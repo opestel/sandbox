@@ -4,7 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-A minimal Node.js + TypeScript starter (ES modules, `NodeNext` resolution). `src/index.ts` exports `greet`; `src/cli.ts` is a `commander`-based CLI (bin name `sandbox`) that wraps it, taking an optional `[name]` argument and defaulting to `"World"`.
+A minimal Node.js + TypeScript starter (ES modules, `NodeNext` resolution) with three entry points:
+
+- `src/index.ts` — exports `greet`, the core library function.
+- `src/cli.ts` — a `commander`-based CLI (bin name `sandbox`) that wraps `greet`, taking an optional `[name]` argument and defaulting to `"World"`.
+- `src/server.ts` — a plain `node:http` server exposing a small web UI: `public/index.html` (+ `app.js`/`style.css`) asks for a first name and calls `GET /api/origin?name=...`, which is handled by `src/nameOrigin.ts` — it looks up the name on Wikipedia's public API (a search for `"<name> given name"`, then an intro extract for the top hit) and returns `{ title, extract, url }` (or `null` if nothing was found).
 
 ## Commands
 
@@ -13,7 +17,8 @@ A minimal Node.js + TypeScript starter (ES modules, `NodeNext` resolution). `src
 - `npm run typecheck` — type-check only, no emit
 - `npm run dev` — run `src/index.ts` directly with `tsx`
 - `npm run cli` — run the CLI directly with `tsx` (e.g. `npm run cli -- Ada`); after `npm run build`, the built CLI is also runnable as `node dist/cli.js` or via the `sandbox` bin
-- `npm run lint` — ESLint (flat config in `eslint.config.js`, `@eslint/js` + `typescript-eslint` recommended rules)
+- `npm run web` — start the web server (`tsx src/server.ts`, default `http://localhost:3000`, override with `PORT`); after `npm run build`, run the built version with `node dist/server.js`
+- `npm run lint` — ESLint (flat config in `eslint.config.js`, `@eslint/js` + `typescript-eslint` recommended rules); `public/**` is excluded since it's plain browser JS, not part of the TS toolchain
 - `npm test` — run the full Vitest suite once
 - `npm run test:watch` — Vitest in watch mode
 - Run a single test file: `npx vitest run src/index.test.ts`
@@ -21,4 +26,8 @@ A minimal Node.js + TypeScript starter (ES modules, `NodeNext` resolution). `src
 
 ## Architecture notes
 
-The codebase is still small — there is no established architecture beyond a library entry point (`src/index.ts`) plus a thin CLI wrapper (`src/cli.ts`) that stays free of business logic. As real modules are added under `src/`, prefer colocating each module's test as `*.test.ts` next to the source file (see `src/index.test.ts`). `src/cli.test.ts` is an integration test that shells out to `tsx src/cli.ts` via `execFileSync` and asserts on stdout — follow that pattern for testing future CLI commands rather than unit-testing `commander` wiring directly. Update this file with real build/architecture guidance once the project takes shape.
+- Each entry point stays thin and delegates to a plain function: `cli.ts` wraps `greet`, `server.ts` wraps `getNameOrigin` (from `nameOrigin.ts`) behind an HTTP API and a static file server for `public/`. Keep business logic out of the entry-point files themselves.
+- `nameOrigin.ts` calls the real Wikipedia REST API via the global `fetch`; `nameOrigin.test.ts` covers it by mocking `globalThis.fetch` (`vi.spyOn`), and `server.test.ts` covers the HTTP layer by `vi.mock`-ing `./nameOrigin.js` and hitting a real server bound to an ephemeral port (`server.listen(0)`) — prefer this mock-at-the-boundary pattern over hitting the live API in tests.
+- `src/cli.test.ts` is a true integration test that shells out to `tsx src/cli.ts` via `execFileSync` and asserts on stdout — follow that pattern for testing future CLI commands rather than unit-testing `commander` wiring directly.
+- Prefer colocating each module's test as `*.test.ts` next to the source file.
+- Wikipedia's API is not reachable from every network environment (e.g. restrictive sandboxes/CI egress policies) — a `502` from `/api/origin` with a `"Wikipedia search failed"` or `"Wikipedia extract failed"` message usually means the request itself failed, not a bug in the lookup logic.

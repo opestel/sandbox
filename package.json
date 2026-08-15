@@ -12,6 +12,7 @@
     "build": "tsc",
     "dev": "tsx src/index.ts",
     "cli": "tsx src/cli.ts",
+    "web": "tsx src/server.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
