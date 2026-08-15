@@ -8,7 +8,7 @@ A minimal Node.js + TypeScript starter (ES modules, `NodeNext` resolution) with 
 
 - `src/index.ts` — exports `greet`, the core library function.
 - `src/cli.ts` — a `commander`-based CLI (bin name `sandbox`) that wraps `greet`, taking an optional `[name]` argument and defaulting to `"World"`.
-- `src/server.ts` — a plain `node:http` server exposing a small web UI: `public/index.html` (+ `app.js`/`style.css`) asks for a first name and calls `GET /api/origin?name=...`, which is handled by `src/nameOrigin.ts` — it looks up the name on Wikipedia's public API (a search for `"<name> given name"`, then an intro extract for the top hit) and returns `{ title, extract, url }` (or `null` if nothing was found).
+- `src/server.ts` — a plain `node:http` server exposing a small web UI: `public/index.html` (+ `app.js`/`style.css`) asks for a first name and calls `GET /api/origin?name=...`, which is handled by `src/nameOrigin.ts` — it looks up the name on Wikipedia's public API (a search for `"<name> given name"`, then an intro extract for the top hit) and returns `{ title, extract, url }` (or `null` if nothing was found). Once a result is shown, the page can translate the extract via `POST /api/translate` (`{ text, targetLang }` → `{ translatedText }`), handled by `src/translate.ts` using the free MyMemory translation API.
 
 ## Commands
 
@@ -26,8 +26,9 @@ A minimal Node.js + TypeScript starter (ES modules, `NodeNext` resolution) with 
 
 ## Architecture notes
 
-- Each entry point stays thin and delegates to a plain function: `cli.ts` wraps `greet`, `server.ts` wraps `getNameOrigin` (from `nameOrigin.ts`) behind an HTTP API and a static file server for `public/`. Keep business logic out of the entry-point files themselves.
-- `nameOrigin.ts` calls the real Wikipedia REST API via the global `fetch`; `nameOrigin.test.ts` covers it by mocking `globalThis.fetch` (`vi.spyOn`), and `server.test.ts` covers the HTTP layer by `vi.mock`-ing `./nameOrigin.js` and hitting a real server bound to an ephemeral port (`server.listen(0)`) — prefer this mock-at-the-boundary pattern over hitting the live API in tests.
+- Each entry point stays thin and delegates to a plain function: `cli.ts` wraps `greet`, `server.ts` wraps `getNameOrigin` (from `nameOrigin.ts`) and `translateText` (from `translate.ts`) behind an HTTP API and a static file server for `public/`. Keep business logic out of the entry-point files themselves.
+- `nameOrigin.ts` and `translate.ts` both call real third-party REST APIs via the global `fetch`; their `*.test.ts` files cover them by mocking `globalThis.fetch` (`vi.spyOn`), and `server.test.ts` covers the HTTP layer by `vi.mock`-ing `./nameOrigin.js` and `./translate.js` and hitting a real server bound to an ephemeral port (`server.listen(0)`) — prefer this mock-at-the-boundary pattern over hitting live third-party APIs in tests.
+- `translate.ts` chunks input text (splitting on sentence boundaries, ~400 chars/chunk) before calling MyMemory, since its anonymous tier caps request size — long extracts become multiple sequential requests, joined back together.
 - `src/cli.test.ts` is a true integration test that shells out to `tsx src/cli.ts` via `execFileSync` and asserts on stdout — follow that pattern for testing future CLI commands rather than unit-testing `commander` wiring directly.
 - Prefer colocating each module's test as `*.test.ts` next to the source file.
 - Wikipedia's API is not reachable from every network environment (e.g. restrictive sandboxes/CI egress policies) — a `502` from `/api/origin` with a `"Wikipedia search failed"` or `"Wikipedia extract failed"` message usually means the request itself failed, not a bug in the lookup logic.

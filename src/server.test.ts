@@ -12,6 +12,12 @@ vi.mock('./nameOrigin.js', () => ({
   ),
 }));
 
+vi.mock('./translate.js', () => ({
+  translateText: vi.fn(async (text: string, targetLang: string) =>
+    targetLang === 'es' ? `[es] ${text}` : Promise.reject(new Error('unsupported language')),
+  ),
+}));
+
 import { server } from './server.js';
 
 let baseUrl: string;
@@ -58,5 +64,44 @@ describe('server', () => {
   it('returns 404 for unknown static paths', async () => {
     const res = await fetch(`${baseUrl}/does-not-exist`);
     expect(res.status).toBe(404);
+  });
+
+  it('translates text via the API', async () => {
+    const res = await fetch(`${baseUrl}/api/translate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: 'Ada is a name.', targetLang: 'es' }),
+    });
+    expect(res.status).toBe(200);
+    await expect(res.json()).resolves.toEqual({
+      translatedText: '[es] Ada is a name.',
+    });
+  });
+
+  it('returns 400 when translate is missing text or targetLang', async () => {
+    const res = await fetch(`${baseUrl}/api/translate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: 'Ada is a name.' }),
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 502 when the translation service fails', async () => {
+    const res = await fetch(`${baseUrl}/api/translate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: 'Ada is a name.', targetLang: 'xx' }),
+    });
+    expect(res.status).toBe(502);
+  });
+
+  it('returns 400 for malformed JSON on translate', async () => {
+    const res = await fetch(`${baseUrl}/api/translate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{not valid json',
+    });
+    expect(res.status).toBe(400);
   });
 });
