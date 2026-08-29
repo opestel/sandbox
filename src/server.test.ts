@@ -66,6 +66,29 @@ describe('server', () => {
     expect(res.status).toBe(404);
   });
 
+  it('serves the world map page', async () => {
+    const res = await fetch(`${baseUrl}/map.html`);
+    expect(res.status).toBe(200);
+    expect(await res.text()).toContain('Interactive World Map');
+  });
+
+  it('serves country borders as geo+json', async () => {
+    const res = await fetch(`${baseUrl}/data/countries.geojson`);
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toContain('application/geo+json');
+    const geojson = (await res.json()) as { type: string; features: unknown[] };
+    expect(geojson.type).toBe('FeatureCollection');
+    expect(geojson.features.length).toBeGreaterThan(0);
+  });
+
+  it('serves capital cities as geo+json', async () => {
+    const res = await fetch(`${baseUrl}/data/capitals.geojson`);
+    expect(res.status).toBe(200);
+    const geojson = (await res.json()) as { type: string; features: unknown[] };
+    expect(geojson.type).toBe('FeatureCollection');
+    expect(geojson.features.length).toBeGreaterThan(0);
+  });
+
   it('translates text via the API', async () => {
     const res = await fetch(`${baseUrl}/api/translate`, {
       method: 'POST',

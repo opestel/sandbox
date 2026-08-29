@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>World Map</title>
+    <link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="map.css" />
+  </head>
+  <body class="map-body">
+    <header class="map-header">
+      <nav class="site-nav"><a href="/">← Name Origin Finder</a></nav>
+      <h1>Interactive World Map</h1>
+      <div class="map-controls">
+        <input
+          type="search"
+          id="country-search"
+          list="country-list"
+          placeholder="Jump to a country…"
+          autocomplete="off"
+        />
+        <datalist id="country-list"></datalist>
+        <label><input type="checkbox" id="toggle-borders" checked /> Borders</label>
+        <label><input type="checkbox" id="toggle-capitals" checked /> Capitals</label>
+      </div>
+    </header>
+
+    <div id="map"></div>
+
+    <p id="map-error" class="error map-error" hidden></p>
+
+    <script src="vendor/leaflet/leaflet.js"></script>
+    <script src="map.js"></script>
+  </body>
+</html>
