@@ -65,6 +65,13 @@ const capitalsLayer = L.geoJSON(null, {
   onEachFeature(feature, layer) {
     const { capital, country } = feature.properties;
     layer.bindPopup(`<div class="capital-popup"><strong>${capital}</strong>Capital of ${country}</div>`);
+    layer.bindTooltip(capital, {
+      permanent: true,
+      direction: 'top',
+      offset: [0, -6],
+      className: 'capital-label',
+      interactive: false,
+    });
   },
 });
 
