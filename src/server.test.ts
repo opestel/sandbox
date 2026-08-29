@@ -34,10 +34,18 @@ afterAll(() => {
 });
 
 describe('server', () => {
-  it('serves the static index page', async () => {
+  it('serves the static index page as a tool hub', async () => {
     const res = await fetch(`${baseUrl}/`);
     expect(res.status).toBe(200);
-    expect(await res.text()).toContain('Name Origin Finder');
+    const body = await res.text();
+    expect(body).toContain('Name Origin Finder');
+    expect(body).toContain('World Map');
+  });
+
+  it('serves the name origin finder page', async () => {
+    const res = await fetch(`${baseUrl}/name-origin.html`);
+    expect(res.status).toBe(200);
+    expect(await res.text()).toContain("What's in a name?");
   });
 
   it('returns a name origin from the API', async () => {
