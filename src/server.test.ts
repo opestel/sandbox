@@ -34,10 +34,18 @@ afterAll(() => {
 });
 
 describe('server', () => {
-  it('serves the static index page', async () => {
+  it('serves the static index page as a tool hub', async () => {
     const res = await fetch(`${baseUrl}/`);
     expect(res.status).toBe(200);
-    expect(await res.text()).toContain('Name Origin Finder');
+    const body = await res.text();
+    expect(body).toContain('Name Origin Finder');
+    expect(body).toContain('World Map');
+  });
+
+  it('serves the name origin finder page', async () => {
+    const res = await fetch(`${baseUrl}/name-origin.html`);
+    expect(res.status).toBe(200);
+    expect(await res.text()).toContain("What's in a name?");
   });
 
   it('returns a name origin from the API', async () => {
@@ -64,6 +72,29 @@ describe('server', () => {
   it('returns 404 for unknown static paths', async () => {
     const res = await fetch(`${baseUrl}/does-not-exist`);
     expect(res.status).toBe(404);
+  });
+
+  it('serves the world map page', async () => {
+    const res = await fetch(`${baseUrl}/map.html`);
+    expect(res.status).toBe(200);
+    expect(await res.text()).toContain('Interactive World Map');
+  });
+
+  it('serves country borders as geo+json', async () => {
+    const res = await fetch(`${baseUrl}/data/countries.geojson`);
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toContain('application/geo+json');
+    const geojson = (await res.json()) as { type: string; features: unknown[] };
+    expect(geojson.type).toBe('FeatureCollection');
+    expect(geojson.features.length).toBeGreaterThan(0);
+  });
+
+  it('serves capital cities as geo+json', async () => {
+    const res = await fetch(`${baseUrl}/data/capitals.geojson`);
+    expect(res.status).toBe(200);
+    const geojson = (await res.json()) as { type: string; features: unknown[] };
+    expect(geojson.type).toBe('FeatureCollection');
+    expect(geojson.features.length).toBeGreaterThan(0);
   });
 
   it('translates text via the API', async () => {
