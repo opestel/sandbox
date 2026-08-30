@@ -8,6 +8,7 @@
   --accent-hover: #54408c;
   --border: #d9d9de;
   --error: #b3261e;
+  --success: #1e7d34;
   --ocean: #cfe8f0;
   --land: #f2ead1;
 }
@@ -22,6 +23,7 @@
     --accent-hover: #cbb8fa;
     --border: #3a3a3c;
     --error: #ff6961;
+    --success: #6fcf7c;
     --ocean: #0f2a3a;
     --land: #33301f;
   }

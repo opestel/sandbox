@@ -30,6 +30,22 @@
 
     <p id="map-error" class="error map-error" hidden></p>
 
+    <section id="quiz-panel" class="quiz-panel">
+      <div class="quiz-header">
+        <h2>Capital Quiz</h2>
+        <span id="quiz-score" class="quiz-score">0 / 0</span>
+        <button type="button" id="quiz-toggle" class="quiz-toggle" aria-expanded="true">Hide</button>
+      </div>
+      <div id="quiz-body" class="quiz-body">
+        <p class="quiz-question">What is the capital of <strong id="quiz-country">…</strong>?</p>
+        <div id="quiz-options" class="quiz-options"></div>
+        <div class="quiz-footer">
+          <p id="quiz-feedback" class="quiz-feedback" hidden></p>
+          <button type="button" id="quiz-next" class="quiz-next" hidden>Next question →</button>
+        </div>
+      </div>
+    </section>
+
     <script src="vendor/leaflet/leaflet.js"></script>
     <script src="map.js"></script>
   </body>
