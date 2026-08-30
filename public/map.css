@@ -1,6 +1,8 @@
 body.map-body {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
   margin: 0;
   padding: 0;
   height: 100vh;
@@ -115,4 +117,119 @@ body.map-body {
 
 .capital-label::before {
   display: none;
+}
+
+.quiz-panel {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  background: var(--card-bg);
+  border-top: 1px solid var(--border);
+  padding: 0.75rem 1.25rem 1rem;
+}
+
+.quiz-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.quiz-header h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.quiz-score {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.quiz-toggle {
+  margin-left: auto;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.8rem;
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--border);
+}
+
+button.quiz-toggle:hover {
+  background: transparent;
+  border-color: var(--accent);
+}
+
+.quiz-panel.collapsed .quiz-body {
+  display: none;
+}
+
+.quiz-body {
+  margin-top: 0.65rem;
+}
+
+.quiz-question {
+  margin: 0 0 0.65rem;
+  font-size: 0.95rem;
+}
+
+.quiz-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.5rem;
+}
+
+.quiz-option {
+  padding: 0.55rem 0.8rem;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+.quiz-option:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--bg);
+}
+
+.quiz-option:disabled {
+  cursor: default;
+}
+
+.quiz-option.correct {
+  border-color: var(--success);
+  color: var(--success);
+  font-weight: 600;
+}
+
+.quiz-option.incorrect {
+  border-color: var(--error);
+  color: var(--error);
+}
+
+.quiz-footer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.6rem;
+  min-height: 2.25rem;
+}
+
+.quiz-feedback {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.quiz-feedback-correct {
+  color: var(--success);
+}
+
+.quiz-feedback-incorrect {
+  color: var(--error);
+}
+
+.quiz-next {
+  margin-left: auto;
+  padding: 0.45rem 1rem;
+  font-size: 0.85rem;
 }
