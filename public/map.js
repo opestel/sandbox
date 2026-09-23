@@ -85,6 +85,20 @@ const capitalsLayer = L.geoJSON(null, {
 
 const countryLayers = new Map();
 
+// countries.geojson and capitals.geojson name the same country differently in a
+// few cases; this maps the capitals-dataset name to the boundaries-dataset name
+// so the quiz can still find and highlight the right polygon.
+const COUNTRY_NAME_ALIASES = {
+  Tanzania: 'United Republic of Tanzania',
+  Serbia: 'Republic of Serbia',
+  'Congo (Kinshasa)': 'Democratic Republic of the Congo',
+  'Congo (Brazzaville)': 'Republic of the Congo',
+  'Cape Verde': 'Cabo Verde',
+  'Guinea Bissau': 'Guinea-Bissau',
+  'The Gambia': 'Gambia',
+  'Sao Tome and Principe': 'São Tomé and Principe',
+};
+
 async function loadBorders() {
   const res = await fetch('/data/countries.geojson');
   if (!res.ok) {
@@ -232,7 +246,7 @@ function answerQuizQuestion(choice, button) {
   quizFeedback.hidden = false;
   quizNext.hidden = false;
 
-  const layer = countryLayers.get(quizAnswer.country);
+  const layer = countryLayers.get(COUNTRY_NAME_ALIASES[quizAnswer.country] ?? quizAnswer.country);
   if (layer) {
     map.fitBounds(layer.getBounds(), { maxZoom: 5 });
     layer.setStyle(borderHighlightStyle);
